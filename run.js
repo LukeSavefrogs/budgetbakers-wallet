@@ -1,15 +1,29 @@
 import wallet from 'wallet-budgetbakers-import';
 
-const walletEmail = process.argv[0];
-const walletPassword = process.argv[1];
+import { program } from 'commander';
 
-const importEmail = process.argv[2];
+program
+  .name('BudgetBakers\' automatic import')
+  .description('Import all the provided expenses data into your Wallet account')
+  .requiredOption('-u, --username <username>')
+  .option('-p, --password <password>')
+  .requiredOption('-e, --import-email <email>')
+  .option('-f, --file <file>');
+
+program.parse();
+
+const options = program.opts();
+const limit = options.first ? 1 : undefined;
+
+const walletEmail = options.username;
+const walletPassword = options.password;
+
+const importEmail = options.importEmail;
 
 try {
     await wallet.login(walletEmail, walletPassword);
     const result = await wallet.importFile({
-        //file: 'path/to/file/2022-03-20T16-20.csv',
-        file: '2025-06-18T01-23.csv',
+        file: options.file,
         email: importEmail,
 	newRecordsOnly: false,
     });
