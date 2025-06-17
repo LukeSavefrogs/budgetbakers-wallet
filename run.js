@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import wallet from 'wallet-budgetbakers-import';
 
 import { program } from 'commander';
