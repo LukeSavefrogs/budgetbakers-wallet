@@ -49,7 +49,7 @@ const tempDir = fs.mkdtempSync(new Date().toISOString() + '-');
 try {
     // Create file from provided data if no file is specified
 	if (!options.file) {
-		console.log("Recprd date: " + moment(options.date + " " + options.time, "DD-MM-YY HH:mm").toDate().toISOString())
+		console.log("Record date: " + moment(options.date + " " + options.time, "DD-MM-YY HH:mm").toDate().toISOString())
 		let currentDatetime = new Date().toISOString().replace('T', ' ').substring(0, 16).replace(" ", "T").replace(":", "-");
 
 		console.log('Current Datetime is ' + currentDatetime)
@@ -60,6 +60,7 @@ try {
 			+ "\n" + moment(options.date + " " + options.time, "DD-MM-YY HH:mm").toDate().toISOString() + "," + options.note + ",0," + options.amount.replace(",", ".") + "," + options.currency + "," + options.recipient
 		)
 	}
+    
     console.log('Processing file "' + importedFilename + '"');
     console.log('File contents: ' + fs.readFileSync(importedFilename));
     await wallet.login(walletEmail, walletPassword);
