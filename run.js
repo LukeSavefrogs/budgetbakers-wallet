@@ -6,6 +6,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import moment from 'moment';
 
+import { stringify } from "csv-stringify/sync";
+import { parse } from "csv-parse/sync";
+
+import { fileURLToPath } from 'url';
+// Use `import.meta.url` instead of `__dirname` or `import.meta.dirname`
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 program
   .name('BudgetBakers\' automatic import')
   .description('Import all the provided expenses data into your Wallet account')
@@ -54,15 +62,33 @@ try {
 
 		console.log('Current Datetime is ' + currentDatetime)
 		importedFilename = path.join(tempDir, currentDatetime + '.csv')
-		fs.writeFileSync(
-			importedFilename, 
-			fs.readFileSync(path.join(import.meta.dirname, 'example.csv')).toString().split('\n')[0] 
-			+ "\n" + moment(options.date + " " + options.time, "DD-MM-YY HH:mm").toDate().toISOString() + "," + options.note + ",0," + options.amount.replace(",", ".") + "," + options.currency + "," + options.recipient
-		)
+
+        const header = parse(
+            fs.readFileSync(path.join(__dirname, 'example.csv')).toString(),
+            {
+                skip_empty_lines: true,
+                bom: true,
+                trim: true,
+            }
+        );
+        const output = stringify([
+            header[0],
+            [
+                moment(options.date + " " + options.time, "DD-MM-YY HH:mm").toDate().toISOString(),
+                options.note,
+                '0',
+                options.amount.replace(".", "").replace(",", "."),
+                options.currency,
+                options.recipient,
+            ]
+        ]);
+
+		fs.writeFileSync(importedFilename, output)
 	}
-    
+
     console.log('Processing file "' + importedFilename + '"');
-    console.log('File contents: ' + fs.readFileSync(importedFilename));
+    console.log('File contents: \n' + fs.readFileSync(importedFilename).toString().split('\n').map(line => '  | ' + line).join('\n'));
+
     await wallet.login(walletEmail, walletPassword);
     const result = await wallet.importFile({
         file: importedFilename,
