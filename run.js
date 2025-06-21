@@ -24,6 +24,20 @@ program.parse();
 
 const options = program.opts();
 
+// Validate required options
+if (options.file) {
+    if (!fs.existsSync(options.file)) {
+        console.error(`File "${options.file}" does not exist.`);
+        process.exit(1);
+    } else if (options.currency || options.amount || options.date || options.time) {
+        console.error('If a file is specified, no other options should be provided.');
+        process.exit(1);
+    }
+} else if (!options.file && (!options.currency || !options.amount || !options.date || !options.time)) {
+    console.error('If no file is specified, at least --currency, --amount, --date, and --time are required.');
+    process.exit(1);
+}
+
 const walletEmail = options.username;
 const walletPassword = options.password;
 
@@ -33,6 +47,7 @@ let importedFilename = options.file;
 const tempDir = fs.mkdtempSync(new Date().toISOString() + '-');
 
 try {
+    // Create file from provided data if no file is specified
 	if (!options.file) {
 		console.log("Recprd date: " + moment(options.date + " " + options.time, "DD-MM-YY HH:mm").toDate().toISOString())
 		let currentDatetime = new Date().toISOString().replace('T', ' ').substring(0, 16).replace(" ", "T").replace(":", "-");
@@ -51,7 +66,7 @@ try {
     const result = await wallet.importFile({
         file: importedFilename,
         email: importEmail,
-	newRecordsOnly: false,
+        newRecordsOnly: false,
     });
     console.log(result);
 } catch(err) {
