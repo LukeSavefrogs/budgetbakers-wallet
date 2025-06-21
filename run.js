@@ -3,7 +3,6 @@ import wallet from 'wallet-budgetbakers-import';
 
 import { program } from 'commander';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import moment from 'moment';
 
@@ -24,7 +23,6 @@ program
 program.parse();
 
 const options = program.opts();
-const limit = options.first ? 1 : undefined;
 
 const walletEmail = options.username;
 const walletPassword = options.password;
